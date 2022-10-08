@@ -1,11 +1,13 @@
 #pragma once
-#include "tracker.h"
-#include "detector.h"
-#include "base/capture_utils.h"
-#include "base/atomque.h"
+#include <atomic>
 #include <memory>
 #include <thread>
-#include <atomic>
+
+#include "arctern/detector.h"
+#include "arctern/tracker.h"
+#include "base/atomque.h"
+#include "base/capture_utils.h"
+#include "uploader.h"
 namespace camera {
 
 class Capturer {
@@ -13,47 +15,59 @@ class Capturer {
   std::shared_ptr<Detector> detector_;
   std::shared_ptr<Tracker> tracker_;
 
-  std::shared_ptr<std::thread> detect_thread_;
-  std::shared_ptr<std::thread> track_thread_;
+  std::shared_ptr<std::thread> detect_and_track_thread_;
+  std::shared_ptr<std::thread> capture_thread_;
 
-  Atomque<CaptureInfo, 5> detect_que_;
-  Atomque<CaptureInfo, 5> track_que_;
+  Atomque<CaptureInfo, 1> detect_que_;
+  Atomque<CaptureInfo, 1> track_que_;
 
   std::atomic_bool bRunning;
-  size_t track_interval_ = 5;
-  size_t frame_count_ = 0;
 
-  std::vector<int> capture_time_;
+  std::shared_ptr<Uploader> load_;
+
+  CaptureParam param_;
+  DetectParam detect_param_;
+  UploadParam upload_param_;
+
+  size_t track_count_;
+  unsigned long long frame_count_;
+
  public:
-  Capturer();
+  Capturer(const CaptureParam& param, const DetectParam& detectParam,
+           const UploadParam& uploadParam);
   ~Capturer();
 
   template <typename DETECTOR, typename TRACKER>
-  int init(){
+  int init() {
     detector_ = std::make_shared<DETECTOR>();
-    if(detector_ == nullptr){
-        return -1;
-    } 
-    if(detector_->init() != 0){
-        return -1;
+    if (detector_ == nullptr) {
+      return -1;
+    }
+    std::cout << "detector init..." << std::endl;
+    if (detector_->init(detect_param_.modelPath, detect_param_.minThresh) !=
+        0) {
+      return -1;
     }
 
     tracker_ = std::make_shared<TRACKER>();
-    if(tracker_ == nullptr) {
-        return -1;
+    if (tracker_ == nullptr) {
+      return -1;
     }
-    if(tracker_->init() != 0){
-        return -1;
+    std::cout << "tracker init..." << std::endl;
+    if (tracker_->init() != 0) {
+      return -1;
     }
 
     return 0;
   }
-  
-  int delivery(const cv::Mat &img, const std::string &time);
- 
+
+  int delivery(const cv::Mat& img, const std::string& time);
+
   int start();
   int stop();
-  int detect();
-  int track();
+
+ private:
+  int detect_and_track();
+  int capture();
 };
 }  // namespace camera

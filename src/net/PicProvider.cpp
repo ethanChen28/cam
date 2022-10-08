@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include <iostream>
-namespace camera {
+
 std::shared_ptr<PartList> PicProvider::createMultipart(
     const std::unordered_map<oatpp::String, oatpp::String>& map) {
   auto multipart =
@@ -26,6 +26,7 @@ std::shared_ptr<PartList> PicProvider::createMultipart(
 
 PicProvider::PicProvider(const oatpp::String& ip, const v_uint16& port)
     : ip_(ip), port_(port) {
+  oatpp::base::Environment::init();
   /* create connection provider */
   auto connectionProvider = tcp::client::ConnectionProvider::createShared(
       Address(ip_, port_, oatpp::network::Address::IP_4));
@@ -39,6 +40,10 @@ PicProvider::PicProvider(const oatpp::String& ip, const v_uint16& port)
 
   /* create API client */
   client_ = CaptureClient::createShared(requestExecutor, objectMapper);
+}
+
+PicProvider::~PicProvider(){
+  oatpp::base::Environment::destroy();
 }
 
 int PicProvider::pushPic(const std::shared_ptr<SendPicDto>& pic) {
@@ -71,5 +76,5 @@ int PicProvider::pushPic(const std::shared_ptr<SendPicDto>& pic) {
     OATPP_LOGI("pushPic", "stack=%s", e.what());
     return -1;
   }
+  return 0;
 }
-}  // namespace camera

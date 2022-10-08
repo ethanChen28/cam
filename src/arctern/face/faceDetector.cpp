@@ -21,7 +21,7 @@ int FaceDetector::init(const std::string &modelPath, const float thresh) {
   return 0;
 }
 
-int FaceDetector::detect(const cv::Mat &img,
+int FaceDetector::detect(const cv::Mat &img, const int minRect,
                          std::vector<DetectResult> &results) {
   if (detect_ == nullptr) return -1;
   arctern::ArcternImage arctern_img;
@@ -49,6 +49,9 @@ int FaceDetector::detect(const cv::Mat &img,
     for (int i = 0; i < num; i++) {
       DetectResult result;
       auto &detInfo = face_detect_tiny_result.detInfos_[pId][i];
+      if(detInfo.rect.width * detInfo.rect.height < minRect){
+        continue;
+      }
 
       result.rect = {(int)detInfo.rect.x, (int)detInfo.rect.y,
                      (int)detInfo.rect.width, (int)detInfo.rect.height};

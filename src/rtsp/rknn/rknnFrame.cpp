@@ -54,13 +54,9 @@ int RknnFrame::get(FUNC &callBack) {
 
   printf("%s initial finish\n", __func__);
 
-  // pthread_t read_thread;
-  // OutputArgs outArgs = {pOutPath, frameCnt};
-  // pthread_create(&read_thread, NULL, GetMediaBuffer, &outArgs);
-  int errCode = 0;
+  code_.store(0);
   auto thread_handle = std::make_shared<std::thread>(&RknnFrame::GetMediaBuffer, this,
-                                                     std::ref(callBack),
-                                                     std::ref(errCode));
+                                                     std::ref(callBack));
   thread_handle->detach();
   ret = RK_MPI_VI_StartStream(s32CamId, 0);
   if (ret) {
@@ -69,7 +65,7 @@ int RknnFrame::get(FUNC &callBack) {
   }
 
   while (true) {
-    if(errCode != 0) break;
+    if(code_.load() != 0) break;
     std::this_thread::sleep_for(std::chrono::microseconds(1000));
   }
 
@@ -83,13 +79,13 @@ int RknnFrame::get(FUNC &callBack) {
 
 }
 
-void RknnFrame::GetMediaBuffer(FUNC &func, int &code) {
+void RknnFrame::GetMediaBuffer(FUNC &func) {
   MEDIA_BUFFER mb = NULL;
   while (true) {
     mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_VI, 0, -1);
     if (!mb) {
       std::cout << "RK_MPI_SYS_GetMediaBuffer get null buffer!" << std::endl;
-      code = -1;
+      code_.store(1);
       return;
     }
 
@@ -97,7 +93,7 @@ void RknnFrame::GetMediaBuffer(FUNC &func, int &code) {
     int ret = RK_MPI_MB_GetImageInfo(mb, &stImageInfo);
     if (ret) {
       std::cout << "Warn: Get image info failed! ret = " <<  ret << std::endl;
-      code = -1;
+      code_.store(2);
       return;
     }
 

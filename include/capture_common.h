@@ -55,3 +55,10 @@ inline std::string getIpByName(const std::string &name) {
   }
   return "";
 }
+
+inline std::string getNameFromPath(const std::string& path){
+  if(path == "") return "";
+  auto pos = path.find_last_of('/');
+  if(pos == std::string::npos) return path;
+  return path.substr(pos+1);
+}

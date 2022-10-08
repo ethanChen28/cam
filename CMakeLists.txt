@@ -10,14 +10,14 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message("=============================${CMAKE_BUILD_TYPE}===========================")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall")
-        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -g -Wall")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ")
+        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -g ")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
         message("=============================${CMAKE_BUILD_TYPE}===========================")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -o3 -Wall")
-        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -o3 -Wall")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -o3 ")
+        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -o3 ")
 endif()
 
 set(SOLUTION_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -64,4 +64,4 @@ target_link_libraries(${PROJECT_NAME} ${ARCTERN_LIBS}
                                       ${OPENCV_LIBS}
 )
 
-# add_subdirectory(test)
+#add_subdirectory(test)

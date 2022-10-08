@@ -1,5 +1,46 @@
-#include "capture_common.h"
+#include "capture_utils.h"
+#include "json.hpp"
+#include <fstream>
 namespace camera {
+int parseConfigFile(const std::string &path, CaptureParam &param,
+                     DetectParam &detectParam, UploadParam &uploadParam) {
+  try {
+    std::ifstream fin(path);
+    if(!fin.is_open()) return -1;
+    std::ostringstream tmp;
+    tmp << fin.rdbuf();
+    auto j3 = nlohmann::json::parse(tmp.str());
+    if (!j3.contains("Detect")) return 1;
+    if (!j3["Detect"].contains("ModelPath")) return 1;
+    if (!j3["Detect"].contains("MinThresh")) return 1;
+    if (!j3["Detect"].contains("MinRect")) return 1;
+    if (!j3["Detect"].contains("Interv")) return 1;
+    detectParam.modelPath = j3["Detect"]["ModelPath"].get<std::string>();
+    detectParam.minThresh = j3["Detect"]["MinThresh"].get<float>();
+    detectParam.minRect = j3["Detect"]["MinRect"].get<int>();
+    detectParam.interv = j3["Detect"]["Interv"].get<int>();
+
+    if (!j3.contains("Capture")) return 2;
+    if (!j3["Capture"].contains("Mode")) return 2;
+    if (!j3["Capture"].contains("Interv")) return 2;
+    if (!j3["Capture"].contains("CaptureTime")) return 2;
+    param.mode = j3["Capture"]["Mode"].get<int>();
+    param.interv = j3["Capture"]["Interv"].get<int>();
+    param.times = j3["Capture"]["CaptureTime"].get<std::vector<int>>();
+
+    if (!j3.contains("Upload")) return 3;
+    if (!j3["Upload"].contains("Ip")) return 3;
+    if (!j3["Upload"].contains("Port")) return 3;
+    uploadParam.ip = j3["Upload"]["Ip"].get<std::string>();
+    uploadParam.port = j3["Upload"]["Port"].get<int>();
+  
+  } catch (const std::exception &e) {
+    std::cout << "parse config failed, stack: " << e.what() << std::endl;
+    return 4;
+  }
+  return 0;
+}
+
 int CaculateWeekDay(int y, int m, int d) {
   if (m == 1 || m == 2) {
     m += 12;
@@ -18,7 +59,8 @@ int CaculateWeekDay(int y, int m, int d) {
   // }
   return iWeek;
 }
-bool isCaptureAtNow(const std::vector<int> & points) {
+
+bool isCaptureAtNow(const std::vector<int> &points) {
   time_t t;
   time(&t);
 
@@ -30,7 +72,7 @@ bool isCaptureAtNow(const std::vector<int> & points) {
 
   int week = CaculateWeekDay(year, month, day);
 
-  int hsum = week * 24 + hour;
+  size_t hsum = week * 24 + hour;
   if (points.size() > hsum) {
     if (points[hsum] == 1) {
       return true;

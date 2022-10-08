@@ -12,7 +12,7 @@ class Detector {
   virtual ~Detector() = default;
 
   virtual int init(const std::string &, const float) = 0;
-  virtual int detect(const cv::Mat &,
+  virtual int detect(const cv::Mat &, const int,
                      std::vector<DetectResult> &) = 0;
 };
 

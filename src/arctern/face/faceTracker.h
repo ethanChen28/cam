@@ -1,6 +1,7 @@
 #pragma once
-#include "../tracker.h"
 #include <memory>
+
+#include "../tracker.h"
 namespace camera {
 class FaceTracker : public Tracker {
  private:
@@ -11,8 +12,9 @@ class FaceTracker : public Tracker {
   ~FaceTracker();
 
   int init() override;
-  int track(const cv::Mat& img) override;
-  int update(const cv::Mat& img, const std::vector<cv::Rect>& rects) override;
+  int track(const cv::Mat& img, std::vector<TrackingResult>&results) override;
+  int update(const cv::Mat& img, const std::vector<cv::Rect>& rects,
+             std::vector<TrackingResult>&results) override;
 };
 
 }  // namespace camera
