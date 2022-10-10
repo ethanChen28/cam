@@ -25,17 +25,22 @@ set(SOLUTION_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 if(WITH_RKNN)
         message("==================rknn===================")
         add_definitions(-DWITH_RKNN)
+        add_definitions(-DTIME_TRACE)
         include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/rknn.cmake)
 
         set(PLATFORM_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/rknn/rknnFrame.cpp
                             ${CMAKE_CURRENT_SOURCE_DIR}/3rd/rknn/RKinclude/common/sample_common_isp.cpp)
-
-        set(PLATFORM_SOURCE ${PLATFORM_SOURCE}  
-                            ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/face/faceDetector.cpp
-                            ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/face/faceTracker.cpp)
-        
-        message("PLATFORM_SOURCE:　${PLATFORM_SOURCE}")
 endif()
+
+# set(PLATFORM_SOURCE ${PLATFORM_SOURCE}  
+#                     ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/face/faceDetector.cpp
+#                     ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/face/faceTracker.cpp
+# )
+set(PLATFORM_SOURCE ${PLATFORM_SOURCE}  
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/comm/commDetector.cpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/comm/commTracker.cpp
+)   
+message("PLATFORM_SOURCE:　${PLATFORM_SOURCE}")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/oatpp.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/opencv.cmake)
@@ -64,4 +69,4 @@ target_link_libraries(${PROJECT_NAME} ${ARCTERN_LIBS}
                                       ${OPENCV_LIBS}
 )
 
-#add_subdirectory(test)
+add_subdirectory(test)

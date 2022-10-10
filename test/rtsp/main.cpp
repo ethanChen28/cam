@@ -22,9 +22,9 @@ int main(){
         std::cout << "w: " << bgr.cols << std::endl;
         std::cout << "h: " << bgr.rows << std::endl;
         std::cout << "time: " << info.time << std::endl;
-        static int index = 0;
-        auto path = "/data/camera-deploy/pics/" + std::to_string(index++) + ".jpg";
-        cv::imwrite(path, bgr);
+        //static int index = 0;
+        //auto path = "/data/camera-deploy/pics/" + std::to_string(index++) + ".jpg";
+        //cv::imwrite(path, bgr);
     };
     frame->get(callBackFunc); 
     return 0;

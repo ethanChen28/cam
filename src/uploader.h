@@ -14,7 +14,7 @@ class Uploader {
  private:
   UploadParam param_;
   int mode_;
-  int count_;
+  time_t start_time_;
   int interv_;
   std::string model_name_;
   std::unordered_map<int, std::vector<CaptureInfo>> track_id_to_info_;
@@ -28,6 +28,6 @@ class Uploader {
   int doInterval();
   int doFast();
   int doLeave();
-  bool isDisappear(const int id);
+  bool isDisappear(const int id, const time_t &time);
 };
 }  // namespace camera

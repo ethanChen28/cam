@@ -47,5 +47,10 @@ link_directories(${arctern_lib})
 set(PLATFORM_LIBS ${PLATFORM_LIBS} ${arctern_lib}/libarctern-base.so
 )
 
+include_directories(/usr/local/arctern/include)
+link_directories(/usr/local/arctern/lib)
+set(PLATFORM_LIBS ${PLATFORM_LIBS} ArcternAlg
+)
+
 set(COMMON_LIBS ${COMMON_LIBS} dl rt pthread       
 )

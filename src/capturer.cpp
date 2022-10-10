@@ -1,5 +1,6 @@
 #include "capturer.h"
 
+#include "base/autoTime.h"
 #include "capture_common.h"
 namespace camera {
 Capturer::Capturer(const CaptureParam& param, const DetectParam& detectParam,
@@ -15,12 +16,12 @@ Capturer::Capturer(const CaptureParam& param, const DetectParam& detectParam,
 }
 Capturer::~Capturer() {}
 
-int Capturer::delivery(const cv::Mat& img, const std::string& time) {
-  std::cout << "delivery..." << std::endl;
+int Capturer::delivery(const cv::Mat& img, const time_t& time) {
   CaptureInfo info;
   info.img = img;
   info.time = time;
   detect_que_.squeese_back(info);
+  std::cout << "delivery..." << std::endl;
   return 0;
 }
 
@@ -39,7 +40,10 @@ int Capturer::start() {
   return 0;
 }
 
-int Capturer::stop() { bRunning.store(false); }
+int Capturer::stop() {
+  bRunning.store(false);
+  return 0;
+}
 
 int Capturer::detect_and_track() {
   while (bRunning) {
@@ -50,9 +54,10 @@ int Capturer::detect_and_track() {
     }
 
     CaptureInfo info;
-    auto ret = detect_que_.pop_front_until(info, std::chrono::milliseconds(20));
+    auto ret = detect_que_.pop_front_until(info, std::chrono::milliseconds(5));
 
     if (0 != ret) {
+      std::cout << "wait for 5 milli second..." << std::endl;
       continue;
     }
     if (info.img.empty()) {
@@ -65,10 +70,13 @@ int Capturer::detect_and_track() {
     std::vector<TrackingResult> track_results;
 
     if (track_count_ >= 0 && track_count_ < detect_param_.interv) {
-      auto ret = tracker_->track(info.img, track_results);
-      if (ret != 0) {
-        std::cout << "track failed." << std::endl;
-        continue;
+      AUTOTIME {
+        AUTOTIME
+        auto ret = tracker_->track(info.img, track_results);
+        if (ret != 0) {
+          std::cout << "track failed." << std::endl;
+          continue;
+        }
       }
       track_count_++;
       std::cout << "only track rect size: " << track_results.size()
@@ -85,12 +93,16 @@ int Capturer::detect_and_track() {
                       info.rets.push_back(capture_result);
                     });
     } else {
+      AUTOTIME
       std::vector<DetectResult> detect_results;
-      auto ret =
-          detector_->detect(info.img, detect_param_.minRect, detect_results);
-      if (ret != 0 || detect_results.empty()) {
-        std::cout << "detect failed or result is empty..." << std::endl;
-        continue;
+      {
+        AUTOTIME
+        auto ret =
+            detector_->detect(info.img, detect_param_.minRect, detect_results);
+        if (ret != 0 || detect_results.empty()) {
+          std::cout << "detect failed or result is empty..." << std::endl;
+          continue;
+        }
       }
       track_count_ = 0;
 
@@ -98,10 +110,18 @@ int Capturer::detect_and_track() {
       std::transform(detect_results.begin(), detect_results.end(),
                      rects.begin(),
                      [](const DetectResult& result) { return result.rect; });
-      ret = tracker_->update(info.img, rects, track_results);
-      if (ret != 0) {
-        std::cout << "track update failed." << std::endl;
-        continue;
+      std::cout << "+++++++++++++++ rects: " << rects.size()
+                << "+++++++++++++++++" << std::endl;
+      std::for_each(rects.begin(), rects.end(), [](const cv::Rect& r) {
+        std::cout << "++++++++++++++++" << r << std::endl;
+      });
+      {
+        AUTOTIME
+        auto ret = tracker_->update(info.img, rects, track_results);
+        if (ret != 0) {
+          std::cout << "track update failed." << std::endl;
+          continue;
+        }
       }
       std::cout << "detect rect size: " << detect_results.size() << std::endl;
       std::for_each(detect_results.begin(), detect_results.end(),
@@ -135,9 +155,10 @@ int Capturer::detect_and_track() {
 int Capturer::capture() {
   while (bRunning) {
     CaptureInfo info;
-    int ret = track_que_.pop_front_until(info, std::chrono::milliseconds(20));
+    int ret = track_que_.pop_front_until(info, std::chrono::milliseconds(5));
     if (ret != 0) {
-      continue;
+      info.time = getCurrentTime();
+      // continue;
     }
     ret = load_->push(info);
     if (ret != 0) {

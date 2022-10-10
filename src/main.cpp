@@ -1,7 +1,11 @@
 #include <iostream>
 
-#include "arctern/face/faceDetector.h"
-#include "arctern/face/faceTracker.h"
+// #include "arctern/face/faceDetector.h"
+// #include "arctern/face/faceTracker.h"
+
+#include "arctern/comm/commDetector.h"
+#include "arctern/comm/commTracker.h"
+
 #include "base/capture_utils.h"
 #include "capturer.h"
 #include "json.hpp"
@@ -25,7 +29,8 @@ int main(int argc, char **argv) {
   }
 
   camera::Capturer capturer(captureParam, detectParam, uploadParam);
-  ret = capturer.init<camera::FaceDetector, camera::FaceTracker>();
+  //ret = capturer.init<camera::FaceDetector, camera::FaceTracker>();
+  ret = capturer.init<camera::CommDetector, camera::CommTracker>();
   if(ret != 0) {
     std::cout << "capturer init failed." << std::endl;
     return 0;
@@ -49,8 +54,8 @@ int main(int argc, char **argv) {
       cv::cvtColor(yuvImg, bgr, cv::COLOR_YUV2BGR_NV21);
     }
 
-    std::cout << "w: " << bgr.cols << std::endl;
-    std::cout << "h: " << bgr.rows << std::endl;
+    //std::cout << "w: " << bgr.cols << std::endl;
+    //std::cout << "h: " << bgr.rows << std::endl;
     std::cout << "time: " << info.time << std::endl;
     // static int index = 0;
     // auto path = "/data/camera-deploy/pics/" + std::to_string(index++) +

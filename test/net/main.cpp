@@ -8,7 +8,7 @@ int test() {
 
   size_t port = 9998;
   std::cout << "port: " << port << std::endl;
-  camera::PicProvider provider(ip, port);
+  PicProvider provider(ip, port);
 
   auto pic = SendPicDto::createShared();
   pic->picData = oatpp::String::loadFromFile("/data/camera-deploy/pics/1.jpg");

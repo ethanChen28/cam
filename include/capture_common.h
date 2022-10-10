@@ -1,28 +1,40 @@
 #pragma once
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <thread>
-#include <fstream>
-
-#include <sys/socket.h>
-#include <sys/ioctl.h>
+#include <arpa/inet.h>
 #include <net/if.h>
 #include <netdb.h>
-#include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/statfs.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
-inline std::string getCurrentTime() {
+#include <thread>
+inline time_t getCurrentTime() {
   time_t t;
   time(&t);
+  return t;
+}
+
+inline std::string timeToString(const time_t &t) {
   auto ptm = localtime(&t);
-  std::string result =
-      std::to_string(ptm->tm_year + 1900) + "-" +
-      std::to_string(ptm->tm_mon + 1) + "-" + std::to_string(ptm->tm_mday) +
-      " " + std::to_string(ptm->tm_hour) + ":" + std::to_string(ptm->tm_min) +
-      ":" + std::to_string(ptm->tm_sec);
+
+  auto mon = std::to_string(ptm->tm_mon + 1);
+  mon = mon.size() == 1 ? "0" + mon : mon;
+  auto day = std::to_string(ptm->tm_mday);
+  day = day.size() == 1 ? "0" + day : day;
+  auto hour = std::to_string(ptm->tm_hour);
+  hour = hour.size() == 1 ? "0" + hour : hour;
+  auto min = std::to_string(ptm->tm_min);
+  min = min.size() == 1 ? "0" + min : min;
+  auto sec = std::to_string(ptm->tm_sec);
+  sec = sec.size() == 1 ? "0" + sec : sec;
+
+  std::string result = std::to_string(ptm->tm_year + 1900) + "-" + mon + "-" +
+                       day + " " + hour + ":" + min + ":" + sec;
 
   return result;
 }
@@ -45,9 +57,10 @@ inline std::string getIpByName(const std::string &name) {
   for (int i = (ifconf.ifc_len / sizeof(struct ifreq)); i > 0; i--) {
     // for ipv4
     if (ifreq->ifr_flags == AF_INET) {
-      std::string ip = inet_ntoa(((struct sockaddr_in *)&(ifreq->ifr_addr))->sin_addr);
+      std::string ip =
+          inet_ntoa(((struct sockaddr_in *)&(ifreq->ifr_addr))->sin_addr);
       std::string tmpName = ifreq->ifr_name;
-      if(tmpName == name){
+      if (tmpName == name) {
         return ip;
       }
       ifreq++;
@@ -56,9 +69,9 @@ inline std::string getIpByName(const std::string &name) {
   return "";
 }
 
-inline std::string getNameFromPath(const std::string& path){
-  if(path == "") return "";
+inline std::string getNameFromPath(const std::string &path) {
+  if (path == "") return "";
   auto pos = path.find_last_of('/');
-  if(pos == std::string::npos) return path;
-  return path.substr(pos+1);
+  if (pos == std::string::npos) return path;
+  return path.substr(pos + 1);
 }

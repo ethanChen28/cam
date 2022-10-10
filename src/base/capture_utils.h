@@ -8,7 +8,7 @@ typedef struct {
   size_t height;
   size_t width;
   size_t size;
-  std::string time;
+  time_t time;
   int fmt;
 } FrameInfo;
 
@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
   cv::Mat img;
-  std::string time;
+  time_t time;
   int frameId;
 
   std::vector<CaptureResult> rets;

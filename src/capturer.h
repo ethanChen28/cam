@@ -18,8 +18,8 @@ class Capturer {
   std::shared_ptr<std::thread> detect_and_track_thread_;
   std::shared_ptr<std::thread> capture_thread_;
 
-  Atomque<CaptureInfo, 1> detect_que_;
-  Atomque<CaptureInfo, 1> track_que_;
+  Atomque<CaptureInfo, 5> detect_que_;
+  Atomque<CaptureInfo, 5> track_que_;
 
   std::atomic_bool bRunning;
 
@@ -61,7 +61,7 @@ class Capturer {
     return 0;
   }
 
-  int delivery(const cv::Mat& img, const std::string& time);
+  int delivery(const cv::Mat& img, const time_t& time);
 
   int start();
   int stop();

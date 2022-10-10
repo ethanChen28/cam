@@ -5,19 +5,17 @@
 namespace camera {
 Uploader::Uploader(const UploadParam& param, const int mode, const int interv,
                    const std::string modelName)
-    : param_(param),
-      mode_(mode),
-      count_(0),
-      interv_(interv),
-      model_name_(modelName) {
-         std::string ip;
-  if(param_.ip == "localhost"){
+    : param_(param), mode_(mode), interv_(interv), model_name_(modelName) {
+  std::string ip;
+  if (param_.ip == "localhost") {
     param_.ip = getIpByName("eth0");
   }
   std::cout << "ip: " << param_.ip << std::endl;
 
   std::cout << "port: " << param_.port << std::endl;
   pic_provider_ = std::make_shared<PicProvider>(param_.ip, param_.port);
+
+  start_time_ = getCurrentTime();
 }
 
 Uploader::~Uploader() {}
@@ -26,13 +24,12 @@ int Uploader::push(const CaptureInfo& info) {
   std::for_each(info.rets.begin(), info.rets.end(),
                 [&](const CaptureResult& r) {
                   track_id_to_info_[r.trackId].push_back(info);
-                  if(r.trackId == 0){
+                  if (r.trackId == 0) {
                     ///> trackid loop from 0 to 65535, so per loop need clear
                     track_id_to_upload_.clear();
                   }
                 });
   newest_frame_ = info;
-  count_++;
   switch (mode_) {
     case 1:
       return doFast();
@@ -48,7 +45,6 @@ int Uploader::push(const CaptureInfo& info) {
 }
 
 int Uploader::load(const CaptureInfo& info) {
- 
   auto pic = SendPicDto::createShared();
   std::vector<u_char> encodeImg;
   cv::imencode(".jpg", info.img, encodeImg);
@@ -58,7 +54,8 @@ int Uploader::load(const CaptureInfo& info) {
       oatpp::String(model_name_.c_str(), model_name_.size());
   auto frameId = std::to_string(info.frameId);
   pic->picInfo->frameId = oatpp::String(frameId.c_str(), frameId.size());
-  pic->picInfo->time = oatpp::String(getCurrentTime());
+  auto time = timeToString(info.time);
+  pic->picInfo->time = oatpp::String(time.c_str(), time.size());
   pic->picInfo->infer = oatpp::List<oatpp::Object<InferDto>>::createShared();
 
   const size_t rectSize = info.rets.size();
@@ -103,7 +100,7 @@ int Uploader::getBest(const std::vector<CaptureInfo>& infos, const int id) {
   for (size_t i = 0; i < infos.size(); i++) {
     auto rect = func(infos[i], id);
     auto area = rect.width * rect.height;
-    if (area >= maxRect) {
+    if (area > maxRect) {
       maxRect = area;
       pos = i;
     }
@@ -113,7 +110,7 @@ int Uploader::getBest(const std::vector<CaptureInfo>& infos, const int id) {
 
 int Uploader::doInterval() {
   std::cout << "interval mode..." << std::endl;
-  if (count_ >= interv_) {
+  if (track_id_to_info_.size() >= interv_ || newest_frame_.time > start_time_) {
     for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();
          it++) {
       auto pos = getBest(it->second, it->first);
@@ -122,7 +119,7 @@ int Uploader::doInterval() {
       }
     }
     track_id_to_info_.clear();
-    count_ = 0;
+    start_time_ = newest_frame_.time;
   }
   return 0;
 }
@@ -147,7 +144,12 @@ int Uploader::doFast() {
   return 0;
 }
 
-bool Uploader::isDisappear(const int id) {
+bool Uploader::isDisappear(const int id, const time_t& time) {
+  ///> if no have new frame and time interval over 1 min , then believe target
+  ///disappear
+  if (newest_frame_.rets.empty() && newest_frame_.time < time + 60) {
+    return false;
+  }
   for (auto& it : newest_frame_.rets) {
     if (it.trackId == id) {
       return false;
@@ -159,7 +161,7 @@ bool Uploader::isDisappear(const int id) {
 int Uploader::doLeave() {
   std::cout << "leave mode..." << std::endl;
   for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();) {
-    if (isDisappear(it->first)) {
+    if (isDisappear(it->first, it->second.back().time)) {
       auto pos = getBest(it->second, it->first);
       if (pos != -1) {
         load(it->second[pos]);

@@ -49,7 +49,8 @@ if(WITH_RKNN)
 
         set(ARCTERN_SOURCES ${ARCTERN_SOURCES}  
                             ${SOLUTION_DIR}/src/arctern/face/faceDetector.cpp
-                            ${SOLUTION_DIR}/src/arctern/face/faceTracker.cpp)
+                            ${SOLUTION_DIR}/src/arctern/face/faceTracker.cpp
+                            )
         message("RTSP_SOURCES:　${RTSP_SOURCES}")
         message("CLIENT_SOURCES:　${CLIENT_SOURCES}")
         message("ARCTERN_SOURCES:　${ARCTERN_SOURCES}")
