@@ -1,9 +1,9 @@
 #ifndef WEAPONRY_SRC_ATOMQUE_H
 #define WEAPONRY_SRC_ATOMQUE_H
 
-#include <queue>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <queue>
 
 namespace camera {
 
@@ -11,9 +11,7 @@ template <typename T, int N = 1, typename CONTAINER = std::deque<T>>
 class Atomque {
  public:
   Atomque() = default;
-  ~Atomque() {
-    que_.clear();
-  }
+  ~Atomque() { que_.clear(); }
 
  public:
   size_t size() {
@@ -34,11 +32,11 @@ class Atomque {
 
   void push_back(const T& t) {
     {
-    std::unique_lock<std::mutex> lk(mutex_);
-    if (N == que_.size()) {
-      cond_var_any_inable_.wait(lk, [this]{ return que_.size() < N; });
-    }
-    que_.push_back(t);
+      std::unique_lock<std::mutex> lk(mutex_);
+      if (N == que_.size()) {
+        cond_var_any_inable_.wait(lk, [this] { return que_.size() < N; });
+      }
+      que_.push_back(t);
     }
     cond_var_any_outable_.notify_all();
   }
@@ -62,17 +60,17 @@ class Atomque {
 
   int push_back_until(const T& t, const std::chrono::milliseconds ms) {
     {
-    std::unique_lock<std::mutex> lk(mutex_);
-    if (std::cv_status::timeout == cond_var_any_inable_.wait_for(lk, ms)) {
-      return -1;
-    }
+      std::unique_lock<std::mutex> lk(mutex_);
+      if (std::cv_status::timeout == cond_var_any_inable_.wait_for(lk, ms)) {
+        return -1;
+      }
 
-    if (N == que_.size()) {
-      cond_var_any_outable_.notify_all();
-      return N;
-    }
+      if (N == que_.size()) {
+        cond_var_any_outable_.notify_all();
+        return N;
+      }
 
-    que_.push_back(t);
+      que_.push_back(t);
     }
     cond_var_any_outable_.notify_all();
 
@@ -105,7 +103,7 @@ class Atomque {
 
   T front() {
     std::unique_lock<std::mutex> lk(mutex_);
-    cond_var_any_outable_.wait(lk, [this]{ return !que_.empty(); });
+    cond_var_any_outable_.wait(lk, [this] { return !que_.empty(); });
     return que_.front();
   }
 
@@ -139,12 +137,12 @@ class Atomque {
   T pop_front() {
     T t;
     {
-    std::unique_lock<std::mutex> lk(mutex_);
-    if (que_.empty()) {
-      cond_var_any_outable_.wait(lk, [this]{ return !que_.empty(); });
-    }
-    t = que_.front();
-    que_.pop_front();
+      std::unique_lock<std::mutex> lk(mutex_);
+      if (que_.empty()) {
+        cond_var_any_outable_.wait(lk, [this] { return !que_.empty(); });
+      }
+      t = que_.front();
+      que_.pop_front();
     }
     cond_var_any_inable_.notify_all();
 
@@ -171,16 +169,16 @@ class Atomque {
 
   int pop_front_until(T& t, std::chrono::milliseconds ms) {
     {
-    std::unique_lock<std::mutex> lk(mutex_);
-    if (std::cv_status::timeout == cond_var_any_outable_.wait_for(lk, ms)) {
-      return -1;
-    }
-    if (que_.empty()) {
-      cond_var_any_inable_.notify_all();
-      return N;
-    }
-    t = que_.front();
-    que_.pop_front();
+      std::unique_lock<std::mutex> lk(mutex_);
+      if (std::cv_status::timeout == cond_var_any_outable_.wait_for(lk, ms)) {
+        return -1;
+      }
+      if (que_.empty()) {
+        cond_var_any_inable_.notify_all();
+        return N;
+      }
+      t = que_.front();
+      que_.pop_front();
     }
     cond_var_any_inable_.notify_all();
 
@@ -194,6 +192,6 @@ class Atomque {
   CONTAINER que_;
 };
 
-}   // namespace
+}  // namespace camera
 
-#endif    // WEAPONRY_SRC_ATOMQUE_H
+#endif  // WEAPONRY_SRC_ATOMQUE_H

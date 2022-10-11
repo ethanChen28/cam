@@ -12,8 +12,8 @@ RknnFrame::RknnFrame(/* args */) {}
 RknnFrame::~RknnFrame() {}
 
 int RknnFrame::get(FUNC &callBack) {
-  RK_U32 u32Width = 1920;
-  RK_U32 u32Height = 1080;
+  RK_U32 u32Width = width_;
+  RK_U32 u32Height = height_;
   int frameCnt = 10;
   RK_CHAR *pDeviceName = (RK_CHAR *)"rkispp_scale0";
   RK_CHAR *pIqfilesPath = (RK_CHAR *)"/oem/etc/iqfiles/";
@@ -21,16 +21,16 @@ int RknnFrame::get(FUNC &callBack) {
   RK_BOOL bMultictx = RK_FALSE;
 
 
-  printf("#####Device: %s\n", pDeviceName);
-  printf("#####Resolution: %dx%d\n", u32Width, u32Height);
-  printf("#####Frame Count to save: %d\n", frameCnt);
-  printf("#CameraIdx: %d\n\n", s32CamId);
+  // printf("#####Device: %s\n", pDeviceName);
+  // printf("#####Resolution: %dx%d\n", u32Width, u32Height);
+  // printf("#####Frame Count to save: %d\n", frameCnt);
+  // printf("#CameraIdx: %d\n\n", s32CamId);
 
   if (pIqfilesPath) {
-    printf("#####Aiq xml dirpath: %s\n\n", pIqfilesPath);
-    printf("#bMultictx: %d\n\n", bMultictx);
+    // printf("#####Aiq xml dirpath: %s\n\n", pIqfilesPath);
+    // printf("#bMultictx: %d\n\n", bMultictx);
     rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
-    int fps = 30;
+    int fps = fps_;
     SAMPLE_COMM_ISP_Init(s32CamId, hdr_mode, bMultictx, pIqfilesPath);
     SAMPLE_COMM_ISP_Run(s32CamId);
     SAMPLE_COMM_ISP_SetFrameRate(s32CamId, fps);

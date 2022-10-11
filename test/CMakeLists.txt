@@ -48,8 +48,10 @@ if(WITH_RKNN)
                          ${SOLUTION_DIR}/3rd/rknn/RKinclude/common/sample_common_isp.cpp)
 
         set(ARCTERN_SOURCES ${ARCTERN_SOURCES}  
-                            ${SOLUTION_DIR}/src/arctern/face/faceDetector.cpp
-                            ${SOLUTION_DIR}/src/arctern/face/faceTracker.cpp
+                            #${SOLUTION_DIR}/src/arctern/face/faceDetector.cpp
+                            #${SOLUTION_DIR}/src/arctern/face/faceTracker.cpp
+                            ${SOLUTION_DIR}/src/arctern/comm/commDetector.cpp
+                            ${SOLUTION_DIR}/src/arctern/comm/commTracker.cpp
                             )
         message("RTSP_SOURCES:　${RTSP_SOURCES}")
         message("CLIENT_SOURCES:　${CLIENT_SOURCES}")
@@ -71,6 +73,7 @@ add_executable(${PROJECT_NAME}-arctern ${ARCTERN_SOURCES})
 
 target_link_libraries(${PROJECT_NAME}-arctern ${PLATFORM_LIBS} 
                                               ${COMMON_LIBS}
+                                              ${OPENCV_LIBS}
 )
 
 

@@ -109,7 +109,7 @@ int Uploader::getBest(const std::vector<CaptureInfo>& infos, const int id) {
 }
 
 int Uploader::doInterval() {
-  std::cout << "interval mode..." << std::endl;
+  //std::cout << "interval mode..." << std::endl;
   if (track_id_to_info_.size() >= interv_ || newest_frame_.time > start_time_) {
     for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();
          it++) {
@@ -125,7 +125,7 @@ int Uploader::doInterval() {
 }
 
 int Uploader::doFast() {
-  std::cout << "fast mode..." << std::endl;
+  //std::cout << "fast mode..." << std::endl;
   for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();) {
     if (it->second.size() >= interv_ ||
         newest_frame_.time > it->second.front().time) {
@@ -159,7 +159,7 @@ bool Uploader::isDisappear(const int id, const time_t& time) {
 }
 
 int Uploader::doLeave() {
-  std::cout << "leave mode..." << std::endl;
+  //std::cout << "leave mode..." << std::endl;
   for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();) {
     if (isDisappear(it->first, it->second.back().time)) {
       auto pos = getBest(it->second, it->first);

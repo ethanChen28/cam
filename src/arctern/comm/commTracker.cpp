@@ -25,9 +25,7 @@ int CommTracker::update(const cv::Mat &img, const std::vector<cv::Rect> &rects,
   arctern_img.step = img.step;
   auto trackPtr = (arctern::RKTracker *)track_.get();
   auto ret = trackPtr->RK_update(arctern_img, rects);
-  std::cout << "???????????? rects.size: " << rects.size() << std::endl;
-  std::cout << "???????????? tracking_infos.size: " << ret.tracking_infos.size() << std::endl;
-  std::cout << "???????????? tracked_infos.size: " << ret.tracking_infos.size() << std::endl;
+
   for (size_t i = 0; i < ret.tracking_infos.size(); i++) {
     auto &info = ret.tracking_infos[i];
     results.push_back({info.rect, info.id, int(info.state)});

@@ -1,12 +1,23 @@
 #include "capture_utils.h"
-#include "json.hpp"
+
 #include <fstream>
+
+#include "json.hpp"
 namespace camera {
+cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio) {
+  cv::Rect dst{0, 0, 0, 0};
+  dst.x = int(src.x * wRatio);
+  dst.y = int(src.y * hRatio);
+  dst.width = int(src.width * wRatio);
+  dst.height = int(src.height * hRatio);
+  return dst;
+}
 int parseConfigFile(const std::string &path, CaptureParam &param,
-                     DetectParam &detectParam, UploadParam &uploadParam) {
+                    DetectParam &detectParam, TrackParam &trackParam,
+                    UploadParam &uploadParam) {
   try {
     std::ifstream fin(path);
-    if(!fin.is_open()) return -1;
+    if (!fin.is_open()) return -1;
     std::ostringstream tmp;
     tmp << fin.rdbuf();
     auto j3 = nlohmann::json::parse(tmp.str());
@@ -21,9 +32,13 @@ int parseConfigFile(const std::string &path, CaptureParam &param,
     detectParam.interv = j3["Detect"]["Interv"].get<int>();
 
     if (!j3.contains("Capture")) return 2;
+    if (!j3["Capture"].contains("Width")) return 2;
+    if (!j3["Capture"].contains("Height")) return 2;
     if (!j3["Capture"].contains("Mode")) return 2;
     if (!j3["Capture"].contains("Interv")) return 2;
     if (!j3["Capture"].contains("CaptureTime")) return 2;
+    param.width = j3["Capture"]["Width"].get<int>();
+    param.height = j3["Capture"]["Height"].get<int>();
     param.mode = j3["Capture"]["Mode"].get<int>();
     param.interv = j3["Capture"]["Interv"].get<int>();
     param.times = j3["Capture"]["CaptureTime"].get<std::vector<int>>();
@@ -33,10 +48,16 @@ int parseConfigFile(const std::string &path, CaptureParam &param,
     if (!j3["Upload"].contains("Port")) return 3;
     uploadParam.ip = j3["Upload"]["Ip"].get<std::string>();
     uploadParam.port = j3["Upload"]["Port"].get<int>();
-  
+
+    if (!j3.contains("Track")) return 4;
+    if (!j3["Track"].contains("Width")) return 4;
+    if (!j3["Track"].contains("Height")) return 4;
+    trackParam.width = j3["Track"]["Width"].get<int>();
+    trackParam.height = j3["Track"]["Height"].get<int>();
+
   } catch (const std::exception &e) {
     std::cout << "parse config failed, stack: " << e.what() << std::endl;
-    return 4;
+    return 5;
   }
   return 0;
 }

@@ -42,6 +42,11 @@ typedef struct {
 } CaptureInfo;
 
 typedef struct {
+  int width;
+  int height;
+} TrackParam;
+
+typedef struct {
   std::string modelPath;
   float minThresh;
   int minRect;
@@ -49,6 +54,8 @@ typedef struct {
 } DetectParam;
 
 typedef struct {
+  int width;
+  int height;
   int mode;
   int interv;
   std::vector<int> times;
@@ -62,6 +69,9 @@ typedef struct {
 bool isCaptureAtNow(const std::vector<int> &points);
 
 int parseConfigFile(const std::string &path, CaptureParam &param,
-                     DetectParam &detectParam, UploadParam &uploadParam);
+                    DetectParam &detectParam, TrackParam &trackParam,
+                    UploadParam &uploadParam);
+
+cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio);
 
 }  // namespace camera

@@ -27,6 +27,7 @@ class Capturer {
 
   CaptureParam param_;
   DetectParam detect_param_;
+  TrackParam track_param_;
   UploadParam upload_param_;
 
   size_t track_count_;
@@ -34,7 +35,7 @@ class Capturer {
 
  public:
   Capturer(const CaptureParam& param, const DetectParam& detectParam,
-           const UploadParam& uploadParam);
+           const TrackParam& trackParam, const UploadParam& uploadParam);
   ~Capturer();
 
   template <typename DETECTOR, typename TRACKER>

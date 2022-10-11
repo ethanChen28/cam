@@ -9,9 +9,15 @@
         "MinRect": 200,
         "Interv": 5
     },
+    "Track":{
+        "Width": 640,
+        "Height": 360
+    },
     "Capture": {
+        "Width": 1280,
+        "Height": 720,
         "Mode": 2,
-        "Interv": 30,
+        "Interv": 20,
         "CaptureTime": [
             1,
             1,
