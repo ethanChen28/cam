@@ -22,6 +22,7 @@ class Uploader {
   CaptureInfo newest_frame_;
 
   std::shared_ptr<PicProvider> pic_provider_;
+
  private:
   int load(const CaptureInfo& info);
   int getBest(const std::vector<CaptureInfo>& infos, const int id);

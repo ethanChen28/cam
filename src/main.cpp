@@ -54,12 +54,10 @@ int main(int argc, char **argv) {
       cv::cvtColor(yuvImg, bgr, cv::COLOR_YUV2BGR_NV21);
     }
 
-    std::cout << "w: " << bgr.cols << std::endl;
-    std::cout << "h: " << bgr.rows << std::endl;
-    std::cout << "time: " << info.time << std::endl;
-    // static int index = 0;
-    // auto path = "/data/camera-deploy/pics/" + std::to_string(index++) +
-    // ".jpg"; cv::imwrite(path, bgr);
+    // std::cout << "w: " << bgr.cols << std::endl;
+    // std::cout << "h: " << bgr.rows << std::endl;
+    // std::cout << "time: " << info.time << std::endl;
+
     capturer.delivery(bgr, info.time);
   };
 

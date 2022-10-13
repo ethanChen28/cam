@@ -1,5 +1,7 @@
 #include "uploader.h"
 
+#include <thread>
+
 #include "capture_common.h"
 
 namespace camera {
@@ -11,7 +13,6 @@ Uploader::Uploader(const UploadParam& param, const int mode, const int interv,
     param_.ip = getIpByName("eth0");
   }
   std::cout << "ip: " << param_.ip << std::endl;
-
   std::cout << "port: " << param_.port << std::endl;
   pic_provider_ = std::make_shared<PicProvider>(param_.ip, param_.port);
 
@@ -25,10 +26,11 @@ int Uploader::push(const CaptureInfo& info) {
                 [&](const CaptureResult& r) {
                   track_id_to_info_[r.trackId].push_back(info);
                   if (r.trackId == 0) {
-                    ///> trackid loop from 0 to 65535, so per loop need clear
+                    ///> trackid loop from 0 to 2>>16, so per loop need clear
                     track_id_to_upload_.clear();
                   }
                 });
+
   newest_frame_ = info;
   switch (mode_) {
     case 1:
@@ -87,6 +89,7 @@ int Uploader::load(const CaptureInfo& info) {
   std::cout << "push pic success." << std::endl;
   return 0;
 }
+
 int Uploader::getBest(const std::vector<CaptureInfo>& infos, const int id) {
   auto func = [](const CaptureInfo& info, const int id) -> cv::Rect {
     for (auto& it : info.rets) {
@@ -109,13 +112,15 @@ int Uploader::getBest(const std::vector<CaptureInfo>& infos, const int id) {
 }
 
 int Uploader::doInterval() {
-  //std::cout << "interval mode..." << std::endl;
+  // std::cout << "interval mode..." << std::endl;
   if (track_id_to_info_.size() >= interv_ || newest_frame_.time > start_time_) {
     for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();
          it++) {
       auto pos = getBest(it->second, it->first);
       if (pos != -1) {
-        load(it->second[pos]);
+        auto handle = std::make_shared<std::thread>(&Uploader::load, this,
+                                                    it->second[pos]);
+        handle->detach();
       }
     }
     track_id_to_info_.clear();
@@ -125,14 +130,16 @@ int Uploader::doInterval() {
 }
 
 int Uploader::doFast() {
-  //std::cout << "fast mode..." << std::endl;
+  // std::cout << "fast mode..." << std::endl;
   for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();) {
     if (it->second.size() >= interv_ ||
         newest_frame_.time > it->second.front().time) {
       if (track_id_to_upload_.find(it->first) == track_id_to_upload_.end()) {
         auto pos = getBest(it->second, it->first);
         if (pos != -1) {
-          load(it->second[pos]);
+          auto handle = std::make_shared<std::thread>(&Uploader::load, this,
+                                                      it->second[pos]);
+          handle->detach();
         }
         track_id_to_upload_[it->first] = true;
       }
@@ -145,9 +152,9 @@ int Uploader::doFast() {
 }
 
 bool Uploader::isDisappear(const int id, const time_t& time) {
-  ///> if no have new frame and time interval over 1 min , then believe target
-  ///disappear
-  if (newest_frame_.rets.empty() && newest_frame_.time < time + 60) {
+  ///> if no have new frame and time interval over 3 second , then believe target
+  /// disappear
+  if (newest_frame_.rets.empty() && newest_frame_.time < time + 3) {
     return false;
   }
   for (auto& it : newest_frame_.rets) {
@@ -159,12 +166,14 @@ bool Uploader::isDisappear(const int id, const time_t& time) {
 }
 
 int Uploader::doLeave() {
-  //std::cout << "leave mode..." << std::endl;
+  // std::cout << "leave mode..." << std::endl;
   for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();) {
     if (isDisappear(it->first, it->second.back().time)) {
       auto pos = getBest(it->second, it->first);
       if (pos != -1) {
-        load(it->second[pos]);
+        auto handle = std::make_shared<std::thread>(&Uploader::load, this,
+                                                    it->second[pos]);
+        handle->detach();
       }
       it = track_id_to_info_.erase(it);
     } else {

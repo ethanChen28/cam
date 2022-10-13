@@ -4,6 +4,14 @@
 
 #include "json.hpp"
 namespace camera {
+std::pair<int, float> findClsAndConfById(
+    const std::vector<CaptureResult> &results, const int id) {
+  for (auto &it : results) {
+    if (it.trackId == id) return {it.cls, it.conf};
+  }
+  return {-1, 0.f};
+}
+
 cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio) {
   cv::Rect dst{0, 0, 0, 0};
   dst.x = int(src.x * wRatio);

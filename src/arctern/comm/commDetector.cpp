@@ -58,7 +58,7 @@ int CommDetector::detect(const cv::Mat &img, const int minRect,
       std::cout << "CommDetector result parse failed." << std::endl;
       return -1;
     }
-    std::cout << "info: " << info << std::endl;
+    //std::cout << "info: " << info << std::endl;
     if (!j3.is_array()) {
       std::cout << "CommDetector result is not array, error." << std::endl;
       return -1;

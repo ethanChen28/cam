@@ -53,7 +53,7 @@ int PicProvider::pushPic(const std::shared_ptr<SendPicDto>& pic) {
   auto jsonObjectMapper =
       oatpp::parser::json::mapping::ObjectMapper::createShared();
   oatpp::String json = jsonObjectMapper->writeToString(pic->picInfo);
-  OATPP_LOGI("pushPic", "picInfo=%s", json->c_str());
+  //OATPP_LOGI("pushPic", "picInfo=%s", json->c_str());
   map["picInfo"] = json;
 
   auto multipart = createMultipart(map);
@@ -61,10 +61,10 @@ int PicProvider::pushPic(const std::shared_ptr<SendPicDto>& pic) {
   try {
     auto response = client_->uploadCapturePic(body);
 
-    OATPP_LOGI("pushPic", "desc=%s", response->getStatusDescription()->c_str());
-    OATPP_LOGI("pushPic", "code=%d", response->getStatusCode());
+    //OATPP_LOGI("pushPic", "desc=%s", response->getStatusDescription()->c_str());
+    //OATPP_LOGI("pushPic", "code=%d", response->getStatusCode());
     auto resJson = response->readBodyToString();
-    OATPP_LOGI("pushPic", "response=%s", resJson->c_str());
+    //OATPP_LOGI("pushPic", "response=%s", resJson->c_str());
 
     auto commonResDto =
         jsonObjectMapper->readFromString<oatpp::Object<CommonResDto>>(resJson);

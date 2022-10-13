@@ -25,7 +25,7 @@ set(SOLUTION_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 if(WITH_RKNN)
         message("==================rknn===================")
         add_definitions(-DWITH_RKNN)
-        add_definitions(-DTIME_TRACE)
+        #add_definitions(-DTIME_TRACE)
         include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/rknn.cmake)
 
         set(PLATFORM_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/rknn/rknnFrame.cpp
@@ -44,9 +44,6 @@ message("PLATFORM_SOURCE:　${PLATFORM_SOURCE}")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/oatpp.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/opencv.cmake)
-# add_definitions(
-    
-# )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)

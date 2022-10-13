@@ -30,7 +30,6 @@ typedef struct {
   cv::Rect rect;
   int trackId;
   int status;
-  bool bTrack;
 } CaptureResult;
 
 typedef struct {
@@ -73,5 +72,8 @@ int parseConfigFile(const std::string &path, CaptureParam &param,
                     UploadParam &uploadParam);
 
 cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio);
+
+std::pair<int, float> findClsAndConfById(
+    const std::vector<CaptureResult> &results, const int id);
 
 }  // namespace camera

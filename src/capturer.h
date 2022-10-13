@@ -19,7 +19,7 @@ class Capturer {
   std::shared_ptr<std::thread> capture_thread_;
 
   Atomque<CaptureInfo, 5> detect_que_;
-  Atomque<CaptureInfo, 5> track_que_;
+  Atomque<CaptureInfo, 10> track_que_;
 
   std::atomic_bool bRunning;
 
