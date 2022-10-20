@@ -31,6 +31,8 @@ if(WITH_RKNN)
         set(PLATFORM_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/rknn/rknnFrame.cpp
                             ${CMAKE_CURRENT_SOURCE_DIR}/3rd/rknn/RKinclude/common/sample_common_isp.cpp)
 endif()
+file(GLOB KALMAN_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/kalman/*.cpp 
+)
 
 # set(PLATFORM_SOURCE ${PLATFORM_SOURCE}  
 #                     ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/face/faceDetector.cpp
@@ -57,7 +59,9 @@ message("SOURCES:　${SOURCES}")
 
 
 add_executable(${PROJECT_NAME} ${SOURCES} 
-                               ${PLATFORM_SOURCE})
+                               ${PLATFORM_SOURCE}
+                               ${KALMAN_SOURCES}
+)
 
 target_link_libraries(${PROJECT_NAME} ${ARCTERN_LIBS} 
                                       ${OATPP_LIBS} 

@@ -4,6 +4,15 @@
 
 #include "json.hpp"
 namespace camera {
+cv::Rect checkBox(const cv::Rect &src, const int width, const int height) {
+
+  auto x = std::min(std::max(0, src.x), width - 1);
+  auto y = std::min(std::max(0, src.y), height - 1);
+  auto w = std::min(std::max(1, src.width), width - x);
+  auto h = std::min(std::max(1, src.height), height - y);
+  return {x,y,w,h};
+}
+
 std::pair<int, float> findClsAndConfById(
     const std::vector<CaptureResult> &results, const int id) {
   for (auto &it : results) {

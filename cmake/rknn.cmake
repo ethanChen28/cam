@@ -49,6 +49,10 @@ set(PLATFORM_LIBS ${PLATFORM_LIBS} ${arctern_lib}/libarctern-base.so
 
 include_directories(/usr/local/arctern/include)
 link_directories(/usr/local/arctern/lib)
+
+include_directories(/usr/local/include/eigen3/)
+# find_package(Eigen3)
+
 set(PLATFORM_LIBS ${PLATFORM_LIBS} ArcternAlg
 )
 

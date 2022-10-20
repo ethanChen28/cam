@@ -14,7 +14,8 @@ int FaceTracker::init() {
   return 0;
 }
 
-int FaceTracker::update(const cv::Mat &img, const std::vector<cv::Rect> &rects,
+int FaceTracker::update(const cv::Mat &img,
+                        const std::vector<DetectResult> &detectResults,
                         std::vector<TrackingResult> &results) {
   if (track_ == nullptr) return -1;
   arctern::ArcternImage arctern_img;
@@ -24,11 +25,18 @@ int FaceTracker::update(const cv::Mat &img, const std::vector<cv::Rect> &rects,
   arctern_img.format = arctern::ARCTERN_IMAGE_FORMAT_BGR888;
   arctern_img.step = img.step;
   auto trackPtr = (arctern::RKTracker *)track_.get();
+
+  std::vector<cv::Rect> rects(detectResults.size());
+  std::transform(detectResults.begin(), detectResults.end(), rects.begin(),
+                 [&](const DetectResult &result) { return result.rect; });
+
   auto ret = trackPtr->RK_update(arctern_img, rects);
   for (size_t i = 0; i < ret.tracking_infos.size(); i++) {
     auto &info = ret.tracking_infos[i];
-    results.push_back({info.rect, info.id, int(info.state)});
+    results.push_back({detectResults[i].cls, detectResults[i].conf, info.rect,
+                       info.id, int(info.state)});
   }
+  detect_results_ = detectResults;
   return 0;
 }
 
@@ -45,7 +53,8 @@ int FaceTracker::track(const cv::Mat &img,
   auto ret = trackPtr->RK_track(arctern_img);
   for (size_t i = 0; i < ret.tracking_infos.size(); i++) {
     auto &info = ret.tracking_infos[i];
-    results.push_back({info.rect, info.id, int(info.state)});
+    results.push_back({detect_results_[i].cls, detect_results_[i].conf,
+                       info.rect, info.id, int(info.state)});
   }
   return 0;
 }

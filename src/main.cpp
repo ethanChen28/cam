@@ -3,8 +3,11 @@
 // #include "arctern/face/faceDetector.h"
 // #include "arctern/face/faceTracker.h"
 
+// #include "arctern/comm/commDetector.h"
+// #include "arctern/comm/commTracker.h"
+
 #include "arctern/comm/commDetector.h"
-#include "arctern/comm/commTracker.h"
+#include "arctern/kalman/kalmanTracker.h"
 #include "base/capture_utils.h"
 #include "capturer.h"
 #include "json.hpp"
@@ -30,7 +33,8 @@ int main(int argc, char **argv) {
 
   camera::Capturer capturer(captureParam, detectParam, trackParam, uploadParam);
   // ret = capturer.init<camera::FaceDetector, camera::FaceTracker>();
-  ret = capturer.init<camera::CommDetector, camera::CommTracker>();
+  // ret = capturer.init<camera::CommDetector, camera::CommTracker>();
+  ret = capturer.init<camera::CommDetector, camera::KalmanTracker>();
   if (ret != 0) {
     std::cout << "capturer init failed." << std::endl;
     return 0;

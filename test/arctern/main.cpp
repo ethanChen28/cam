@@ -39,11 +39,12 @@ void testTracker() {
     AUTOTIME
     tracker.init();
   }
-  std::vector<cv::Rect> rects;
-  rects.push_back({1026,84,144,255});
-  rects.push_back({1362,48,135,193});
-  rects.push_back({1245,47,291,736});
-  rects.push_back({819,97,420,812});
+  std::vector<camera::DetectResult> rects;
+
+  rects.push_back({1,0.3,{1026,84,144,255}});
+  rects.push_back({1,0.3,{1362,48,135,193}});
+  rects.push_back({1,0.3,{1245,47,291,736}});
+  rects.push_back({1,0.3,{819,97,420,812}});
   std::vector<camera::TrackingResult> results;
   for(size_t i=0;i<5;i++)
   {

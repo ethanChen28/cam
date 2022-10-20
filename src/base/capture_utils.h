@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-
+#include <memory>
 #include "opencv2/opencv.hpp"
 namespace camera {
 typedef struct {
@@ -19,6 +19,8 @@ typedef struct {
 } DetectResult;
 
 typedef struct {
+  int cls;
+  float conf;
   cv::Rect rect;
   int id;
   int status;
@@ -34,6 +36,7 @@ typedef struct {
 
 typedef struct {
   cv::Mat img;
+  std::shared_ptr<std::vector<uchar>> encImg;
   time_t time;
   int frameId;
 
@@ -75,5 +78,7 @@ cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio);
 
 std::pair<int, float> findClsAndConfById(
     const std::vector<CaptureResult> &results, const int id);
+
+cv::Rect checkBox(const cv::Rect &src, const int width, const int height);
 
 }  // namespace camera

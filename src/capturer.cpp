@@ -22,7 +22,7 @@ int Capturer::delivery(const cv::Mat& img, const time_t& time) {
   info.img = img;
   info.time = time;
   detect_que_.squeese_back(info);
-  //std::cout << "delivery..." << std::endl;
+  // std::cout << "delivery..." << std::endl;
   return 0;
 }
 
@@ -51,7 +51,6 @@ int Capturer::detect_and_track() {
   auto wRatio = param_.width * 1.0f / track_param_.width;
   auto hRatio = param_.height * 1.0f / track_param_.height;
 
-  std::vector<CaptureResult> captureResults;
   while (bRunning) {
     AUTOTIME {
       AUTOTIME
@@ -76,92 +75,103 @@ int Capturer::detect_and_track() {
       cv::resize(info.img, trackImg, trackImg.size());
     }
     info.frameId = frame_count_++ % param_.interv;
-    // std::cout << "================frame count: " << frame_count_
-    //           << "===================" << std::endl;
+    std::cout << "================frame count: " << frame_count_
+              << "===================" << std::endl;
     std::vector<TrackingResult> track_results;
 
-    if (track_count_ >= 0 && track_count_ < detect_param_.interv) {
-      {
-        AUTOTIME
-        auto ret = tracker_->track(trackImg, track_results);
-        if (ret != 0) {
-          std::cout << "track failed." << std::endl;
-          continue;
-        }
+    ///> for commTracker
+    // if (track_count_ >= 0 && track_count_ < detect_param_.interv) {
+    //   {
+    //     AUTOTIME
+    //     auto ret = tracker_->tcrak(trackImg, track_results);
+    //     if (ret != 0) {
+    //       std::cout << "track failed." << std::endl;
+    //       continue;
+    //     }
+    //   }
+    //   track_count_++;
+    //   std::cout << "only track rect size: " << track_results.size()
+    //             << std::endl;
+    //   std::for_each(track_results.begin(), track_results.end(),
+    //                 [&](const TrackingResult& r) {
+    //                   CaptureResult capture_result;
+    //                   auto clsAndConf =
+    //                   findClsAndConfById(captureResults,r.id);
+    //                   capture_result.cls = clsAndConf.first;
+    //                   capture_result.conf = clsAndConf.second;
+
+    //                   capture_result.trackId = r.id;
+    //                   capture_result.rect = resizeRect(r.rect, wRatio,
+    //                   hRatio); info.rets.push_back(capture_result); std::cout
+    //                   << "rect: " << r.rect << std::endl; std::cout << "id: "
+    //                   << r.id << "  status: " << r.status
+    //                             << std::endl;
+    //                 });
+    // } else {
+
+    std::vector<DetectResult> detect_results;
+    {
+      AUTOTIME
+      auto ret =
+          detector_->detect(info.img, detect_param_.minRect, detect_results);
+      if (ret != 0 || detect_results.empty()) {
+        // std::cout << "detect failed or result is empty..." << std::endl;
+        ///> if detect results is empty, but tracker must update
+        // continue;
       }
-      track_count_++;
-      // std::cout << "only track rect size: " << track_results.size()
-      //           << std::endl;
-      std::for_each(track_results.begin(), track_results.end(),
-                    [&](const TrackingResult& r) {
-                      CaptureResult capture_result;
-                      auto clsAndConf = findClsAndConfById(captureResults,r.id);
-                      capture_result.cls = clsAndConf.first;
-                      capture_result.conf = clsAndConf.second;
+    }
+    track_count_ = 0;
+    
+    ///> for kalmanTracker
+    std::vector<DetectResult> rects(detect_results.size());
+    std::transform(detect_results.begin(), detect_results.end(), rects.begin(),
+                   [&](const DetectResult& src) {
+                     DetectResult dst;
+                     dst.cls = src.cls;
+                     dst.conf = src.conf;
+                     dst.rect =
+                         resizeRect(src.rect, 1.0f / wRatio, 1.0f / hRatio);
+                     return dst;
+                   });
 
-                      capture_result.trackId = r.id;
-                      capture_result.rect = resizeRect(r.rect, wRatio, hRatio);
-                      info.rets.push_back(capture_result);
-                      // std::cout << "rect: " << r.rect << std::endl;
-                      // std::cout << "id: " << r.id << "  status: " << r.status
-                      //           << std::endl;
-                    });
-    } else {
-      
-      std::vector<DetectResult> detect_results;
-      {
-        AUTOTIME
-        auto ret =
-            detector_->detect(info.img, detect_param_.minRect, detect_results);
-        if (ret != 0 || detect_results.empty()) {
-          //std::cout << "detect failed or result is empty..." << std::endl;
-          continue;
-        }
+    {
+      AUTOTIME
+      auto ret = tracker_->update(trackImg, rects, track_results);
+      if (ret != 0) {
+        std::cout << "track update failed." << std::endl;
+        continue;
       }
-      track_count_ = 0;
+    }
+    std::cout << "detect rect size: " << detect_results.size() << std::endl;
+    std::for_each(detect_results.begin(), detect_results.end(),
+                  [](const DetectResult& r) {
+                    std::cout << "rect: " << r.rect << std::endl;
+                    std::cout << "cls: " << r.cls << "  conf: " << r.conf
+                              << std::endl;
+                  });
 
-      std::vector<cv::Rect> rects(detect_results.size());
-      std::transform(detect_results.begin(), detect_results.end(),
-                     rects.begin(), [&](const DetectResult& result) {
-                       return resizeRect(result.rect, 1.0f / wRatio,
-                                         1.0f / hRatio);
-                     });
+    std::cout << "track rect size: " << track_results.size() << std::endl;
 
-      {
-        AUTOTIME
-        auto ret = tracker_->update(trackImg, rects, track_results);
-        if (ret != 0) {
-          std::cout << "track update failed." << std::endl;
-          continue;
-        }
-      }
-      // std::cout << "detect rect size: " << detect_results.size() << std::endl;
-      // std::for_each(detect_results.begin(), detect_results.end(),
-      //               [](const DetectResult& r) {
-      //                 std::cout << "rect: " << r.rect << std::endl;
-      //                 std::cout << "cls: " << r.cls << "  conf: " << r.conf
-      //                           << std::endl;
-      //               });
+    for (size_t i = 0; i < track_results.size(); i++) {
+      CaptureResult capture_result;
+      capture_result.cls = track_results[i].cls;
+      capture_result.conf = track_results[i].conf;
 
-      // std::cout << "track rect size: " << track_results.size() << std::endl;
+      capture_result.trackId = track_results[i].id;
+      capture_result.status = track_results[i].status;
+      capture_result.rect = resizeRect(track_results[i].rect, wRatio, hRatio);
+      capture_result.rect = checkBox(capture_result.rect, param_.width, param_.height);
+      std::cout << "rect: " << capture_result.rect << std::endl;
+      std::cout << "id: " << capture_result.trackId
+                << "  status: " << capture_result.status << std::endl;
 
-      for (size_t i = 0; i < track_results.size(); i++) {
-        CaptureResult capture_result;
-        capture_result.cls = detect_results[i].cls;
-        capture_result.conf = detect_results[i].conf;
-
-        capture_result.trackId = track_results[i].id;
-        capture_result.status = track_results[i].status;
-        capture_result.rect = resizeRect(track_results[i].rect, wRatio, hRatio);
-        // std::cout << "rect: " << capture_result.rect << std::endl;
-        // std::cout << "id: " << capture_result.trackId
-        //           << "  status: " << capture_result.status << std::endl;
-
-        info.rets.push_back(capture_result);
-      }
-      captureResults = info.rets;
+      info.rets.push_back(capture_result);
     }
     
+    //}
+    info.encImg = std::make_shared<std::vector<uchar>>();
+    cv::imencode(".jpg", info.img, *(info.encImg));
+    info.img.release();
     track_que_.squeese_back(info);
   }
   return 0;
@@ -175,9 +185,9 @@ int Capturer::capture() {
       if (ret != 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         info.time = getCurrentTime();
-      } 
+      }
     }
-   
+
     {
       AUTOTIME
       auto ret = load_->push(info);

@@ -51,6 +51,12 @@ int CommDetector::detect(const cv::Mat &img, const int minRect,
   int pictureNum = result.infos.size();
   for (int pId = 0; pId < pictureNum; pId++) {
     auto &info = result.infos[pId];
+
+    //std::cout << "info: " << info << std::endl;
+    if(info.empty()){
+      return 0;
+    }
+    
     nlohmann::json j3;
     try {
       j3 = nlohmann::json::parse(info);
@@ -58,7 +64,6 @@ int CommDetector::detect(const cv::Mat &img, const int minRect,
       std::cout << "CommDetector result parse failed." << std::endl;
       return -1;
     }
-    //std::cout << "info: " << info << std::endl;
     if (!j3.is_array()) {
       std::cout << "CommDetector result is not array, error." << std::endl;
       return -1;

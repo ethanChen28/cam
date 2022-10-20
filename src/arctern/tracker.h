@@ -12,9 +12,10 @@ class Tracker {
   virtual ~Tracker() = default;
 
   virtual int init() = 0;
-  virtual int update(const cv::Mat &, const std::vector<cv::Rect> &,
-                     std::vector<TrackingResult> &) = 0;
   virtual int track(const cv::Mat &, std::vector<TrackingResult> &) = 0;
+  virtual int update(const cv::Mat &img,
+                     const std::vector<DetectResult> &,
+                     std::vector<TrackingResult> &) = 0;
 };
 
 }  // namespace camera

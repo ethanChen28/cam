@@ -2,19 +2,18 @@
 #include <memory>
 #include "../tracker.h"
 namespace camera {
-class CommTracker : public Tracker {
+class KalmanTracker : public Tracker {
  private:
   std::shared_ptr<void> track_;
-  std::vector<DetectResult> detect_results_;
   /* data */
  public:
-  CommTracker(/* args */);
-  ~CommTracker();
+  KalmanTracker(/* args */);
+  ~KalmanTracker();
 
   int init() override;
   int track(const cv::Mat& img, std::vector<TrackingResult>& results) override;
-  int update(const cv::Mat &img, const std::vector<DetectResult> &,
-             std::vector<TrackingResult> &) override;
+  int update(const cv::Mat& img, const std::vector<DetectResult>& detectResults,
+             std::vector<TrackingResult>& results) override;
 };
 
 }  // namespace camera

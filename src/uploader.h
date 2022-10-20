@@ -3,6 +3,7 @@
 
 #include "base/capture_utils.h"
 #include "net/PicProvider.hpp"
+#include <list.h>
 namespace camera {
 class Uploader {
  public:
@@ -19,16 +20,18 @@ class Uploader {
   std::string model_name_;
   std::unordered_map<int, std::vector<CaptureInfo>> track_id_to_info_;
   std::unordered_map<int, bool> track_id_to_upload_;
+  
   CaptureInfo newest_frame_;
 
   std::shared_ptr<PicProvider> pic_provider_;
 
  private:
-  int load(const CaptureInfo& info);
+  int load(const CaptureInfo& info, const int id);
   int getBest(const std::vector<CaptureInfo>& infos, const int id);
   int doInterval();
   int doFast();
   int doLeave();
   bool isDisappear(const int id, const time_t &time);
+  bool isDisappear(const int id);
 };
 }  // namespace camera
