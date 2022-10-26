@@ -56,5 +56,9 @@ include_directories(/usr/local/include/eigen3/)
 set(PLATFORM_LIBS ${PLATFORM_LIBS} ArcternAlg
 )
 
-set(COMMON_LIBS ${COMMON_LIBS} dl rt pthread       
+set(COMMON_LIBS ${COMMON_LIBS} uuid dl rt pthread       
 )
+
+include_directories(/usr/local/include)
+link_directories(/usr/local/lib)
+set(OPENSSL_LIBS ssl crypto)

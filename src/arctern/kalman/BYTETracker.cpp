@@ -228,11 +228,6 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
     this->removed_stracks.erase(this->removed_stracks.begin(),
                                 this->removed_stracks.begin() + 56);
   }
-  std::cout << "?????????? tracked_stracks: " << this->tracked_stracks.size()
-            << std::endl;
-  std::cout << "?????????? lost_stracks: " << this->lost_stracks.size()
-            << std::endl;
-  std::cout << "?????????? removed_stracks: " << this->removed_stracks.size()
-            << std::endl;
+  
   return output_stracks;
 }

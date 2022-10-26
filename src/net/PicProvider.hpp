@@ -13,7 +13,6 @@ using namespace oatpp::network;
 using namespace oatpp::web;
 using namespace oatpp::parser;
 
-
 class PicProvider {
  public:
   PicProvider(const oatpp::String &ip, const v_uint16 &port);

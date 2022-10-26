@@ -42,9 +42,6 @@ int Uploader::push(const CaptureInfo& info) {
       }
     }
   }
-  std::cout << "track_id_to_info_:" << track_id_to_info_.size() << std::endl;
-  std::cout << "track_id_to_upload_:" << track_id_to_upload_.size()
-            << std::endl;
   newest_frame_ = info;
   switch (mode_) {
     case 1:
@@ -191,10 +188,7 @@ bool Uploader::isDisappear(const int id) {
 
 int Uploader::doLeave() {
   // std::cout << "leave mode..." << std::endl;
-  int count = 0;
   for (auto it = track_id_to_info_.begin(); it != track_id_to_info_.end();) {
-    count += it->second.size();
-
     ///> for commTracker
     // if (isDisappear(it->first, it->second.back().time)) {
     ///> for kalmanTracker
@@ -213,7 +207,7 @@ int Uploader::doLeave() {
       it++;
     }
   }
-  std::cout << "$$$$$$$ count: " << count << std::endl;
+  
   return 0;
 }
 

@@ -4,17 +4,15 @@
 #include "capture_common.h"
 namespace camera {
 Capturer::Capturer(const CaptureParam& param, const DetectParam& detectParam,
-                   const TrackParam& trackParam, const UploadParam& uploadParam)
+                   const TrackParam& trackParam, const UploadParam& uploadParam,
+                   const AuthParam& authParam)
     : param_(param),
       detect_param_(detectParam),
       track_param_(trackParam),
       upload_param_(uploadParam),
+      auth_param_(authParam),
       track_count_(-1),
-      frame_count_(0) {
-  auto name = getNameFromPath(detect_param_.modelPath);
-  load_ = std::make_shared<Uploader>(upload_param_, param_.mode, param_.interv,
-                                     name);
-}
+      frame_count_(0) {}
 Capturer::~Capturer() {}
 
 int Capturer::delivery(const cv::Mat& img, const time_t& time) {
@@ -30,6 +28,32 @@ int Capturer::start() {
   if (tracker_ == nullptr || detector_ == nullptr) {
     return -1;
   }
+  model_name_ = getNameFromPath(detect_param_.modelPath);
+  std::cout << "model name: " << model_name_ << std::endl;
+  load_ = std::make_shared<Uploader>(upload_param_, param_.mode, param_.interv,
+                                     model_name_);
+  if (load_ == nullptr) return -1;
+
+  auto sn = getSn();
+  auth_ = std::make_shared<Auth>(sn, auth_param_.key);
+  if (auth_ == nullptr) return -1;
+
+  auto ret = auth_->init(auth_param_.ip, auth_param_.port, auth_param_.lisencePath);
+  if (ret != 0) {
+    std::cout << "auth init failed." << std::endl;
+    return 1;
+  }
+  ret = auth_->syncTime();
+  if (ret != 0) {
+    std::cout << "auth sync time failed." << std::endl;
+  }
+  ret = auth_->start();
+  if (ret != 0) {
+    std::cout << "auth start failed." << std::endl;
+    return 1;
+  }
+  std::cout << "auth start success..." << std::endl;
+
   detect_and_track_thread_ =
       std::make_shared<std::thread>(&Capturer::detect_and_track, this);
   detect_and_track_thread_->detach();
@@ -38,6 +62,7 @@ int Capturer::start() {
   capture_thread_->detach();
 
   bRunning.store(true);
+
   return 0;
 }
 
@@ -52,11 +77,20 @@ int Capturer::detect_and_track() {
   auto hRatio = param_.height * 1.0f / track_param_.height;
 
   while (bRunning) {
+    {
+      AUTOTIME
+      auto ret = auth_->check(string2T<int>(model_name_));
+      if(ret != 0) {
+        std::cout << "auth check failed." << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        continue;
+      }
+    }
     AUTOTIME {
       AUTOTIME
       if (!isCaptureAtNow(param_.times)) {
-        std::cout << "now, not do capture..." << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        // std::cout << "now, not do capture..." << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         continue;
       }
     }
@@ -75,8 +109,8 @@ int Capturer::detect_and_track() {
       cv::resize(info.img, trackImg, trackImg.size());
     }
     info.frameId = frame_count_++ % param_.interv;
-    std::cout << "================frame count: " << frame_count_
-              << "===================" << std::endl;
+    // std::cout << "================frame count: " << frame_count_
+    //           << "===================" << std::endl;
     std::vector<TrackingResult> track_results;
 
     ///> for commTracker
@@ -121,7 +155,7 @@ int Capturer::detect_and_track() {
       }
     }
     track_count_ = 0;
-    
+
     ///> for kalmanTracker
     std::vector<DetectResult> rects(detect_results.size());
     std::transform(detect_results.begin(), detect_results.end(), rects.begin(),
@@ -142,15 +176,15 @@ int Capturer::detect_and_track() {
         continue;
       }
     }
-    std::cout << "detect rect size: " << detect_results.size() << std::endl;
-    std::for_each(detect_results.begin(), detect_results.end(),
-                  [](const DetectResult& r) {
-                    std::cout << "rect: " << r.rect << std::endl;
-                    std::cout << "cls: " << r.cls << "  conf: " << r.conf
-                              << std::endl;
-                  });
+    // std::cout << "detect rect size: " << detect_results.size() << std::endl;
+    // std::for_each(detect_results.begin(), detect_results.end(),
+    //               [](const DetectResult& r) {
+    //                 std::cout << "rect: " << r.rect << std::endl;
+    //                 std::cout << "cls: " << r.cls << "  conf: " << r.conf
+    //                           << std::endl;
+    //               });
 
-    std::cout << "track rect size: " << track_results.size() << std::endl;
+    // std::cout << "track rect size: " << track_results.size() << std::endl;
 
     for (size_t i = 0; i < track_results.size(); i++) {
       CaptureResult capture_result;
@@ -160,14 +194,15 @@ int Capturer::detect_and_track() {
       capture_result.trackId = track_results[i].id;
       capture_result.status = track_results[i].status;
       capture_result.rect = resizeRect(track_results[i].rect, wRatio, hRatio);
-      capture_result.rect = checkBox(capture_result.rect, param_.width, param_.height);
-      std::cout << "rect: " << capture_result.rect << std::endl;
-      std::cout << "id: " << capture_result.trackId
-                << "  status: " << capture_result.status << std::endl;
+      capture_result.rect =
+          checkBox(capture_result.rect, param_.width, param_.height);
+      // std::cout << "rect: " << capture_result.rect << std::endl;
+      // std::cout << "id: " << capture_result.trackId
+      //           << "  status: " << capture_result.status << std::endl;
 
       info.rets.push_back(capture_result);
     }
-    
+
     //}
     info.encImg = std::make_shared<std::vector<uchar>>();
     cv::imencode(".jpg", info.img, *(info.encImg));

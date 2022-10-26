@@ -3,6 +3,12 @@
         "Ip": "localhost",
         "Port": 9998
     },
+    "Auth":{
+        "Ip": "192.168.28.146",
+        "Port": 8888,
+        "Key": "6lgKOfE7WZISNOAxYwwaRL",
+        "LisencePath": "/data/camera-deploy/lisence"
+    },
     "Detect": {
         "ModelPath": "\/data\/camera-deploy\/models\/-2.bin",
         "MinThresh": 0.3,

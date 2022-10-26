@@ -68,11 +68,18 @@ typedef struct {
   std::string ip;
 } UploadParam;
 
+typedef struct {
+  int port;
+  std::string ip;
+  std::string key;
+  std::string lisencePath;
+} AuthParam;
+
 bool isCaptureAtNow(const std::vector<int> &points);
 
 int parseConfigFile(const std::string &path, CaptureParam &param,
                     DetectParam &detectParam, TrackParam &trackParam,
-                    UploadParam &uploadParam);
+                    UploadParam &uploadParam, AuthParam &authParam);
 
 cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio);
 

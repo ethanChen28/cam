@@ -27,7 +27,7 @@ int KalmanTracker::update(const cv::Mat &img,
   }
   auto trackPtr = (BYTETracker *)track_.get();
   auto ret = trackPtr->update(objects);
-  std::cout << "kalman tracker result size: " << ret.size() << std::endl;
+
   for (size_t i = 0; i < ret.size(); i++) {
     auto tlwh = ret[i].tlwh;
     if (tlwh.size() < 4) return -1;

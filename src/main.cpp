@@ -20,18 +20,29 @@ int main(int argc, char **argv) {
               << "./CaptureCamer    configpath" << std::endl;
     return 0;
   }
+
+  // std::thread([](){
+  //   std::this_thread::sleep_for(std::chrono::minutes(15));
+  //   system("ps | grep camera-deploy-server | grep -v grep | awk '{print $1}'
+  //   | xargs kill -9 2>&1"); system("ps | grep CaptureCamer | grep -v grep |
+  //   awk '{print $1}' | xargs kill -9 2>&1");
+  // }).detach();
+  // std::cout << "run only 15 mins ..." << std::endl;
+
   camera::CaptureParam captureParam;
   camera::DetectParam detectParam;
   camera::TrackParam trackParam;
   camera::UploadParam uploadParam;
+  camera::AuthParam authParam;
   auto ret = camera::parseConfigFile(argv[1], captureParam, detectParam,
-                                     trackParam, uploadParam);
+                                     trackParam, uploadParam, authParam);
   if (ret != 0) {
     std::cout << "parse config file failed." << std::endl;
     return 0;
   }
 
-  camera::Capturer capturer(captureParam, detectParam, trackParam, uploadParam);
+  camera::Capturer capturer(captureParam, detectParam, trackParam, uploadParam,
+                            authParam);
   // ret = capturer.init<camera::FaceDetector, camera::FaceTracker>();
   // ret = capturer.init<camera::CommDetector, camera::CommTracker>();
   ret = capturer.init<camera::CommDetector, camera::KalmanTracker>();

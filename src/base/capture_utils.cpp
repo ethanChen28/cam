@@ -31,7 +31,7 @@ cv::Rect resizeRect(const cv::Rect &src, float wRatio, float hRatio) {
 }
 int parseConfigFile(const std::string &path, CaptureParam &param,
                     DetectParam &detectParam, TrackParam &trackParam,
-                    UploadParam &uploadParam) {
+                    UploadParam &uploadParam, AuthParam &authParam) {
   try {
     std::ifstream fin(path);
     if (!fin.is_open()) return -1;
@@ -72,6 +72,15 @@ int parseConfigFile(const std::string &path, CaptureParam &param,
     trackParam.width = j3["Track"]["Width"].get<int>();
     trackParam.height = j3["Track"]["Height"].get<int>();
 
+    if (!j3.contains("Auth")) return 5;
+    if (!j3["Auth"].contains("Ip")) return 5;
+    if (!j3["Auth"].contains("Port")) return 5;
+    if (!j3["Auth"].contains("Key")) return 5;
+    if (!j3["Auth"].contains("LisencePath")) return 5;
+    authParam.ip = j3["Auth"]["Ip"].get<std::string>();
+    authParam.port = j3["Auth"]["Port"].get<int>();
+    authParam.key = j3["Auth"]["Key"].get<std::string>();
+    authParam.lisencePath = j3["Auth"]["LisencePath"].get<std::string>();
   } catch (const std::exception &e) {
     std::cout << "parse config failed, stack: " << e.what() << std::endl;
     return 5;

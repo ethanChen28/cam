@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "capture_common.h"
+#include "net/AuthProvider.hpp"
 #include "net/PicProvider.hpp"
 int test() {
   auto ip = getIpByName("eth0");
@@ -44,22 +45,34 @@ int test() {
   return 0;
 }
 
-int main() {
-  oatpp::base::Environment::init();
+int testAuth() {
+  AuthProvider provider("192.168.14.14", 8001);
+  auto currentTime = getCurrentTime();
+  int64_t difftime = 0;
+  auto err = provider.syncTime(int64_t(currentTime), difftime);
+  if (!err) {
+    std::cout << "difftime: " << difftime << std::endl;
+  } else {
+    std::cout << "sync time failed." << std::endl;
+  }
 
-  test();
+  std::string deviceId = "123";
+  std::string authKey = "123";
+  std::string token = "123";
+  std::vector<int> modelList;
+  int64_t expireTime;
+  err = provider.checkAuth(deviceId, authKey, token, modelList, expireTime);
+  if (!err) {
+    std::cout << "expireTime: " << expireTime << std::endl;
+    std::cout << "modelList size: " << modelList.size() << std::endl;
+  } else {
+    std::cout << "check auth failed." << std::endl;
+  }
+  return 0;
+}
 
-  /* Print how much objects were created during app running, and what have
-   * left-probably leaked */
-  /* Disable object counting for release builds using '-D
-   * OATPP_DISABLE_ENV_OBJECT_COUNTERS' flag for better performance */
-  std::cout << "\nEnvironment:\n";
-  std::cout << "objectsCount = " << oatpp::base::Environment::getObjectsCount()
-            << "\n";
-  std::cout << "objectsCreated = "
-            << oatpp::base::Environment::getObjectsCreated() << "\n\n";
-
-  OATPP_ASSERT(oatpp::base::Environment::getObjectsCount() == 0);
-
-  oatpp::base::Environment::destroy();
+int main() { 
+  //test();
+  testAuth();
+  return 0; 
 }

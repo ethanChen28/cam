@@ -65,7 +65,7 @@ int CommDetector::detect(const cv::Mat &img, const int minRect,
       return -1;
     }
     if (!j3.is_array()) {
-      std::cout << "CommDetector result is not array, error." << std::endl;
+      //std::cout << "CommDetector result is not array, error." << std::endl;
       return -1;
     }
 

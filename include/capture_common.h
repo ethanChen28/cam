@@ -11,8 +11,19 @@
 
 #include <ctime>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <thread>
+#include <uuid/uuid.h>
+template <class T>
+T string2T(const std::string &str) {
+  std::stringstream stream;
+  stream << str;
+  T result;
+  stream >> result;
+  return result;
+}
+
 inline time_t getCurrentTime() {
   time_t t;
   time(&t);
@@ -70,8 +81,54 @@ inline std::string getIpByName(const std::string &name) {
 }
 
 inline std::string getNameFromPath(const std::string &path) {
-  if (path == "") return "";
+  std::string ret = "";
+  if (path == "") return ret;
+
   auto pos = path.find_last_of('/');
-  if (pos == std::string::npos) return path;
-  return path.substr(pos + 1);
+  if (pos == std::string::npos) {
+    ret = path;
+  } else {
+    ret = path.substr(pos + 1);
+  }
+  pos = ret.find_last_of('.');
+  if(pos == std::string::npos){
+    return ret;
+  }
+  return ret.substr(0, pos);
+}
+
+inline bool isExsit(const std::string &path) {
+  if (access(path.c_str(), 0)) {
+    return false;
+  }
+  return true;
+}
+
+inline std::string getSn() {
+  std::string stn = "";
+  std::string stnFile = "/stn.conf";
+
+  if (isExsit(stnFile)) {
+    std::fstream fin(stnFile, std::ios::in);
+    if (fin.is_open()) {
+      fin >> stn;
+      fin.close();
+    }
+  }
+  if (stn.empty()) {
+    uuid_t uid;
+    uuid_generate(uid);
+
+    char element[3];
+    for (size_t i = 0; i < sizeof(uid); i++) {
+      sprintf(element, "%02X", uid[i]);
+      // if(i!=0) stn += "-";
+      stn += std::string(element, 2);
+    }
+
+    std::fstream fout(stnFile, std::ios::out);
+    fout << stn;
+    fout.close();
+  }
+  return stn;
 }

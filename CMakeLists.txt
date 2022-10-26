@@ -49,12 +49,15 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/opencv.cmake)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/auth)
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/base/*.cpp 
                   ${CMAKE_CURRENT_SOURCE_DIR}/src/net/*.cpp
                   ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/*.cpp
                   ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/*.cpp
-                  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+                  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+                  ${CMAKE_CURRENT_SOURCE_DIR}/src/auth/*.cpp
+)
 message("SOURCES:　${SOURCES}")
 
 
