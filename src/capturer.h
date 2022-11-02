@@ -8,7 +8,7 @@
 #include "base/atomque.h"
 #include "base/capture_utils.h"
 #include "uploader.h"
-#include "auth/auth.h"
+#include "auth_interface.h"
 namespace camera {
 
 class Capturer {
@@ -35,7 +35,6 @@ class Capturer {
   size_t track_count_;
   unsigned long long frame_count_;
 
-  std::shared_ptr<Auth> auth_;
   std::string model_name_;
  public:
   Capturer(const CaptureParam& param, const DetectParam& detectParam,

@@ -97,7 +97,7 @@ int Uploader::load(const CaptureInfo& info, const int id) {
     std::cout << "push pic failed." << std::endl;
     return -1;
   }
-  std::cout << "push pic success." << std::endl;
+  //std::cout << "push pic success." << std::endl;
   return 0;
 }
 

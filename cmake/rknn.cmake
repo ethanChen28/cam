@@ -53,7 +53,7 @@ link_directories(/usr/local/arctern/lib)
 include_directories(/usr/local/include/eigen3/)
 # find_package(Eigen3)
 
-set(PLATFORM_LIBS ${PLATFORM_LIBS} ArcternAlg
+set(PLATFORM_LIBS ${PLATFORM_LIBS} ArcternAlg auth
 )
 
 set(COMMON_LIBS ${COMMON_LIBS} uuid dl rt pthread       

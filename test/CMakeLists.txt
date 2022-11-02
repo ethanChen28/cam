@@ -39,10 +39,6 @@ file(GLOB ARCTERN_SOURCES ${SOLUTION_DIR}/src/arctern/*.cpp
                        ${CMAKE_CURRENT_SOURCE_DIR}/arctern/*.cpp
                        ${SOLUTION_DIR}/src/base/*.cpp )
 
-file(GLOB AUTH_SOURCES ${SOLUTION_DIR}/src/auth/*.cpp
-                       ${CMAKE_CURRENT_SOURCE_DIR}/auth/*.cpp
-                       ${SOLUTION_DIR}/src/base/*.cpp )                        
-set(AUTH_SOURCES ${AUTH_SOURCES} ${SOLUTION_DIR}/src/net/AuthProvider.cpp)
 # message("RTSP_SOURCES: ${RTSP_SOURCES}")
 if(WITH_RKNN)
         message("==================test rknn===================")
@@ -88,9 +84,3 @@ target_link_libraries(${PROJECT_NAME}-client ${OATPP_LIBS}
                                              ${COMMON_LIBS}
 )
 
-add_executable(${PROJECT_NAME}-auth ${AUTH_SOURCES})
-
-target_link_libraries(${PROJECT_NAME}-auth ${OATPP_LIBS}
-                                           ${OPENSSL_LIBS}
-                                           ${COMMON_LIBS}                  
-)

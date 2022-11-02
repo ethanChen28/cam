@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "capture_common.h"
-#include "net/AuthProvider.hpp"
 #include "net/PicProvider.hpp"
 int test() {
   auto ip = getIpByName("eth0");
@@ -45,34 +44,10 @@ int test() {
   return 0;
 }
 
-int testAuth() {
-  AuthProvider provider("192.168.14.14", 8001);
-  auto currentTime = getCurrentTime();
-  int64_t difftime = 0;
-  auto err = provider.syncTime(int64_t(currentTime), difftime);
-  if (!err) {
-    std::cout << "difftime: " << difftime << std::endl;
-  } else {
-    std::cout << "sync time failed." << std::endl;
-  }
 
-  std::string deviceId = "123";
-  std::string authKey = "123";
-  std::string token = "123";
-  std::vector<int> modelList;
-  int64_t expireTime;
-  err = provider.checkAuth(deviceId, authKey, token, modelList, expireTime);
-  if (!err) {
-    std::cout << "expireTime: " << expireTime << std::endl;
-    std::cout << "modelList size: " << modelList.size() << std::endl;
-  } else {
-    std::cout << "check auth failed." << std::endl;
-  }
-  return 0;
-}
 
 int main() { 
-  //test();
-  testAuth();
+  test();
+
   return 0; 
 }

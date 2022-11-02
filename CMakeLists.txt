@@ -56,7 +56,6 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/base/*.cpp
                   ${CMAKE_CURRENT_SOURCE_DIR}/src/arctern/*.cpp
                   ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/*.cpp
                   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-                  ${CMAKE_CURRENT_SOURCE_DIR}/src/auth/*.cpp
 )
 message("SOURCES:　${SOURCES}")
 

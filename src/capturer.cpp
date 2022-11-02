@@ -35,24 +35,15 @@ int Capturer::start() {
   if (load_ == nullptr) return -1;
 
   auto sn = getSn();
-  auth_ = std::make_shared<Auth>(sn, auth_param_.key);
-  if (auth_ == nullptr) return -1;
-
-  auto ret = auth_->init(auth_param_.ip, auth_param_.port, auth_param_.lisencePath);
-  if (ret != 0) {
-    std::cout << "auth init failed." << std::endl;
-    return 1;
+  if(sn.empty()){
+    std::cout << "sn is nullptr." << std::endl;
   }
-  ret = auth_->syncTime();
-  if (ret != 0) {
-    std::cout << "auth sync time failed." << std::endl;
+  auto ret = arctern_auth_init(auth_param_.key.c_str(), auth_param_.lisencePath.c_str());
+  if(ret != 0){
+    std::cout << "arctern auth init failed." << std::endl;
+    return ret;
   }
-  ret = auth_->start();
-  if (ret != 0) {
-    std::cout << "auth start failed." << std::endl;
-    return 1;
-  }
-  std::cout << "auth start success..." << std::endl;
+  std::cout << "arctern auth init success." << std::endl;
 
   detect_and_track_thread_ =
       std::make_shared<std::thread>(&Capturer::detect_and_track, this);
@@ -77,15 +68,7 @@ int Capturer::detect_and_track() {
   auto hRatio = param_.height * 1.0f / track_param_.height;
 
   while (bRunning) {
-    {
-      AUTOTIME
-      auto ret = auth_->check(string2T<int>(model_name_));
-      if(ret != 0) {
-        std::cout << "auth check failed." << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-        continue;
-      }
-    }
+
     AUTOTIME {
       AUTOTIME
       if (!isCaptureAtNow(param_.times)) {
