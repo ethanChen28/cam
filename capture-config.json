@@ -10,7 +10,7 @@
         "LisencePath": "/data/camera-deploy/lisence"
     },
     "Detect": {
-        "ModelPath": "\/data\/camera-deploy\/models\/-2.bin",
+        "ModelPath": "\/data\/camera-deploy\/models\/-1.bin",
         "MinThresh": 0.3,
         "MinRect": 200,
         "Interv": 5

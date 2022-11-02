@@ -43,7 +43,7 @@ int CommDetector::detect(const cv::Mat &img, const int minRect,
     AUTOTIME
     auto ret = detectPtr->Process(&run_parameter, &result);
     if (ret != arctern2::ErrorType::ERR_SUCCESS) {
-      std::cout << "detect process return failed." << std::endl;
+      //std::cout << "detect process return failed." << std::endl;
       return -1;
     }
   }
